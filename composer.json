@@ -1,0 +1,20 @@
+{
+  "name": "350org/events-and-bookings-3p",
+  "description": "Forked repo to host the Events + plugin files by WPMU Dev",
+  "version": "1.0.0",
+  "keywords": ["wordpress", "plugin"],
+  "homepage": "https://github.com/350org/events-and-bookings-3p",
+  "authors": [
+    {
+      "name": "WPMU DEV",
+      "homepage": "http://premium.wpmudev.org"
+    }
+  ],
+  "type": "wordpress-plugin",
+  "extra": {
+    "installer-name": "events-and-bookings"
+  },
+  "require": {
+    "php": ">=7.0"
+  }
+}
