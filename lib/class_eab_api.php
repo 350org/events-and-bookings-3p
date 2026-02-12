@@ -4,6 +4,16 @@ class Eab_Api {
 
 	private $_data;
 
+	/**
+	 * @var LightOpenID|null
+	 */
+	public $openid;
+
+	/**
+	 * @var array|false
+	 */
+	public $_google_user_cache;
+
 	public function __construct () {
 		$this->_data = Eab_Options::get_instance();
 		add_filter('eab-settings-before_save', array($this, 'save_settings'));

@@ -98,6 +98,8 @@ if ( !class_exists( 'Pointer_Tutorial' ) ) {
 	*	@param bool $force_completion Optional: Set to true to redirect and show the current step for those who have not completed the tutorial. Basically forces the tutorial to be completed or dismissed. Default false.
 	*/
 	class Pointer_Tutorial {
+		public $set_textdomain;
+		public $set_capability;
 		
 		private $registered_pointers = array();
 		private $page_pointers = array();
