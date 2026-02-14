@@ -1,6 +1,11 @@
 <?php
 
 class Eab_Api {
+    /** @var string OpenID identifier */
+    public $openid;
+
+    /** @var array Google user cache */
+    public $_google_user_cache;
 
 	private $_data;
 
