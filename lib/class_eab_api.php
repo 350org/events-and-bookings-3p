@@ -392,10 +392,10 @@ class Eab_Api {
 			"status" => 0,
 		);
 
-		$cache = $this->openid->getAttributes();
+		$cache = $this->_google_user_cache;
 
-		if (isset($cache['namePerson/first']) || isset($cache['namePerson/last']) || isset($cache['namePerson/friendly']) || isset($cache['contact/email'])) {
-			$this->_google_user_cache = $cache;
+		if (!is_array($cache)) {
+			die(json_encode($resp));
 		}
 
 		// Have user, now register him/her
