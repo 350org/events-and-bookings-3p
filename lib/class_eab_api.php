@@ -1,11 +1,6 @@
 <?php
 
 class Eab_Api {
-    /** @var string OpenID identifier */
-    public $openid;
-
-    /** @var array Google user cache */
-    public $_google_user_cache;
 
 	private $_data;
 
@@ -131,29 +126,29 @@ class Eab_Api {
 		)));
 		if (!$this->_data->get_option('facebook-no_init')) {
 			if (defined('EAB_INTERNAL_FLAG__FB_INIT_ADDED')) return false;
-			add_action('wp_footer', create_function('', "echo '" .
-			sprintf(
-				'<div id="fb-root"></div><script type="text/javascript">
-				window.fbAsyncInit = function() {
-					FB.init({
-					  appId: "%s",
-					  status: true,
-					  cookie: true,
-					  xfbml: true,
-					  version    : "v2.5"
-					});
-				};
-				// Load the FB SDK Asynchronously
-				(function(d){
-					var js, id = "facebook-jssdk"; if (d.getElementById(id)) {return;}
-					js = d.createElement("script"); js.id = id; js.async = true;
-					js.src = "//connect.facebook.net/en_US/all.js";
-					d.getElementsByTagName("head")[0].appendChild(js);
-				}(document));
-				</script>',
-				$this->_data->get_option('facebook-app_id')
-			) .
-			"';"));
+			add_action('wp_footer', function() {
+				echo sprintf(
+					'<div id="fb-root"></div><script type="text/javascript">
+					window.fbAsyncInit = function() {
+						FB.init({
+						  appId: "%s",
+						  status: true,
+						  cookie: true,
+						  xfbml: true,
+						  version    : "v2.5"
+						});
+					};
+					// Load the FB SDK Asynchronously
+					(function(d){
+						var js, id = "facebook-jssdk"; if (d.getElementById(id)) {return;}
+						js = d.createElement("script"); js.id = id; js.async = true;
+						js.src = "//connect.facebook.net/en_US/all.js";
+						d.getElementsByTagName("head")[0].appendChild(js);
+					}(document));
+					</script>',
+					$this->_data->get_option('facebook-app_id')
+				);
+			});
 			define('EAB_INTERNAL_FLAG__FB_INIT_ADDED', true, true);
 		}
     }
@@ -396,8 +391,7 @@ class Eab_Api {
 		}
 
 		// Have user, now register him/her
-		if ( !$username = $this->_google_user_cache['namePerson/friendly'] )
-			$username = $this->_google_user_cache['namePerson/first'];
+		$username = $this->_google_user_cache['namePerson/friendly'] ?: $this->_google_user_cache['namePerson/first'];
 		$email = $this->_google_user_cache['contact/email'];
 		$wordp_user = get_user_by('email', $email);
 
