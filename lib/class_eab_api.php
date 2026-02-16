@@ -126,7 +126,8 @@ class Eab_Api {
 		)));
 		if (!$this->_data->get_option('facebook-no_init')) {
 			if (defined('EAB_INTERNAL_FLAG__FB_INIT_ADDED')) return false;
-			add_action('wp_footer', function() {
+			$app_id = $this->_data->get_option('facebook-app_id');
+			add_action('wp_footer', function() use ($app_id) {
 				echo sprintf(
 					'<div id="fb-root"></div><script type="text/javascript">
 					window.fbAsyncInit = function() {
@@ -146,7 +147,7 @@ class Eab_Api {
 						d.getElementsByTagName("head")[0].appendChild(js);
 					}(document));
 					</script>',
-					$this->_data->get_option('facebook-app_id')
+					esc_js($app_id)
 				);
 			});
 			define('EAB_INTERNAL_FLAG__FB_INIT_ADDED', true, true);
@@ -170,11 +171,11 @@ class Eab_Api {
 
 		$fb = get_user_meta($wp_uid, '_eab_fb', true);
 		if ($fb && isset($fb['id'])) {
-			return "<img class='avatar avatar-{$size} photo eab-avatar eab-avatar-facebook' width='{$size}' height='{$size}' src='https://graph.facebook.com/" . $fb['id'] . "/picture' />";
+			return "<img class='avatar avatar-{$size} photo eab-avatar eab-avatar-facebook' width='{$size}' height='{$size}' src='" . esc_url("https://graph.facebook.com/" . $fb['id'] . "/picture") . "' />";
 		}
 		$tw = get_user_meta($wp_uid, '_eab_tw', true);
 		if ($tw && isset($tw['avatar'])) {
-			return "<img class='avatar avatar-{$size} photo eab-avatar eab-avatar-twitter' width='{$size}' height='{$size}' src='" . $tw['avatar'] . "' />";
+			return "<img class='avatar avatar-{$size} photo eab-avatar eab-avatar-twitter' width='{$size}' height='{$size}' src='" . esc_url($tw['avatar']) . "' />";
 		}
 
 		return $avatar;
@@ -193,7 +194,7 @@ class Eab_Api {
 		if (!$token) die(json_encode($resp));
 
 		$result = wp_remote_get( 'https://graph.facebook.com/me?fields=email,name,first_name,last_name&oauth_token=' . $token, array('sslverify' => false) );
-		if (200 != $result['response']['code']) die(json_encode($resp)); // Couldn't fetch info
+		if (is_wp_error($result) || 200 != $result['response']['code']) die(json_encode($resp)); // Couldn't fetch info
 
 		$data = json_decode($result['body']);
 		if (!$data->email) die(json_encode($resp)); // No email, can't go further
@@ -267,7 +268,9 @@ class Eab_Api {
 				$twitter_time = strtotime($headers['date']);
 				$delta = $twitter_time - $test_time;
 				if (abs($delta) > EAB_OAUTH_TIMESTAMP_DELTA_THRESHOLD) {
-					add_action('eab-oauth-twitter-generate_timestamp', create_function('$time', 'return $time + ' . $delta . ';'));
+					add_action('eab-oauth-twitter-generate_timestamp', function($time) use ($delta) {
+						return $time + $delta;
+					});
 				}
 			}
 		}
@@ -308,7 +311,9 @@ class Eab_Api {
 				$twitter_time = strtotime($headers['date']);
 				$delta = $twitter_time - $test_time;
 				if (abs($delta) > EAB_OAUTH_TIMESTAMP_DELTA_THRESHOLD) {
-					add_action('eab-oauth-twitter-generate_timestamp', create_function('$time', 'return $time + ' . $delta . ';'));
+					add_action('eab-oauth-twitter-generate_timestamp', function($time) use ($delta) {
+						return $time + $delta;
+					});
 				}
 			}
 		}
@@ -336,7 +341,9 @@ class Eab_Api {
 			$wordp_user = wp_create_user($username, $password, $email);
 			if (is_wp_error($wordp_user)) die(json_encode($resp)); // Failure creating user
 			else {
-				list($first_name, $last_name) = explode(' ', @$tw_user->name, 2);
+				$names = explode(' ', @$tw_user->name, 2);
+				$first_name = $names[0] ?? '';
+				$last_name = $names[1] ?? '';
 				update_user_meta($wordp_user, 'first_name', $first_name);
 				update_user_meta($wordp_user, 'last_name', $last_name);
 			}
@@ -391,8 +398,9 @@ class Eab_Api {
 		}
 
 		// Have user, now register him/her
-		$username = $this->_google_user_cache['namePerson/friendly'] ?: $this->_google_user_cache['namePerson/first'];
-		$email = $this->_google_user_cache['contact/email'];
+		$cache = $this->openid->getAttributes();
+		$username = $cache['namePerson/friendly'] ?? $cache['namePerson/first'] ?? '';
+		$email = $cache['contact/email'] ?? '';
 		$wordp_user = get_user_by('email', $email);
 
 		if (!$wordp_user) { // Not an existing user, let's create a new one
@@ -407,8 +415,8 @@ class Eab_Api {
 			if (is_wp_error($wordp_user))
 				die(json_encode($resp)); // Failure creating user
 			else {
-				update_user_meta($wordp_user, 'first_name', $this->_google_user_cache['namePerson/first']);
-				update_user_meta($wordp_user, 'last_name', $this->_google_user_cache['namePerson/last']);
+				update_user_meta($wordp_user, 'first_name', $cache['namePerson/first'] ?? '');
+				update_user_meta($wordp_user, 'last_name', $cache['namePerson/last'] ?? '');
 			}
 		}
 		else {
