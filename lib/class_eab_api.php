@@ -193,7 +193,7 @@ class Eab_Api {
 		$token = @$_POST['token'];
 		if (!$token) die(json_encode($resp));
 
-		$result = wp_remote_get( 'https://graph.facebook.com/me?fields=email,name,first_name,last_name&oauth_token=' . $token, array('sslverify' => false) );
+		$result = wp_remote_get( 'https://graph.facebook.com/me?fields=email,name,first_name,last_name&oauth_token=' . $token );
 		if (is_wp_error($result) || 200 != $result['response']['code']) die(json_encode($resp)); // Couldn't fetch info
 
 		$data = json_decode($result['body']);
