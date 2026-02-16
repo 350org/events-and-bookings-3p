@@ -30,7 +30,7 @@ class Eab_EventsHub {
 	 * @TODO Update version number for new releases
      * @var	string
      */
-    const CURRENT_VERSION 		= '1.9.9.1';
+    const CURRENT_VERSION 		= '1.0.4';
 
     /**
      * Translation domain
@@ -1664,4 +1664,5 @@ function eab_plugin_dir() {
 function eab_plugin_url() {
 	return EAB_PLUGIN_URL;
 }
+
 
