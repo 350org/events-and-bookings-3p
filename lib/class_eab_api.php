@@ -150,11 +150,12 @@ class Eab_Api {
 					esc_js($app_id)
 				);
 			});
-			define('EAB_INTERNAL_FLAG__FB_INIT_ADDED', true, true);
+			define('EAB_INTERNAL_FLAG__FB_INIT_ADDED', true);
 		}
     }
 
 	function get_social_api_avatar ($avatar, $id_or_email, $size = '96') {
+		$size = absint($size); // Sanitize size parameter
 		$wp_uid = false;
 		if ( is_object( $id_or_email ) ) {
 			if (isset($id_or_email->comment_author_email)) $id_or_email = $id_or_email->comment_author_email;
@@ -398,7 +399,6 @@ class Eab_Api {
 		}
 
 		// Have user, now register him/her
-		$cache = $this->openid->getAttributes();
 		$username = $cache['namePerson/friendly'] ?? $cache['namePerson/first'] ?? '';
 		$email = $cache['contact/email'] ?? '';
 		$wordp_user = get_user_by('email', $email);
